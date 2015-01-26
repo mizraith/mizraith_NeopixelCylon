@@ -1,6 +1,5 @@
 #include <Adafruit_NeoPixel.h>
 
-
 static uint32_t kOutputPIN = 2;
 static uint32_t kNumberOfPixels = 150;
 
@@ -9,7 +8,7 @@ static uint32_t kWipeDelay = 2;
 static uint32_t kSlowCylonTime = 2000;
 static uint32_t kFastCylonTime = 1000;
 
-#define WIDTH 80
+static int32_t kCylonWidth = 40;
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -33,6 +32,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(kNumberOfPixels, kOutputPIN, NEO_GRB
 //#define INDIGO 0x3300FF
 #define VIOLET 0xFF00FF
 #define WHITE  0xFFFFFF
+#define BLACK 0
 
 void setup() {
   Serial.begin(9600);
@@ -44,27 +44,56 @@ void setup() {
 
 void loop() {
   // Some example procedures showing how to display to the pixels:
-  colorWipe(RED, kWipeDelay); // Red
-  colorWipe(ORANGE, kWipeDelay); // Orange
-  colorWipe(YELLOW, kWipeDelay); // Yellow
-  colorWipe(GREEN, kWipeDelay); // Green
-  colorWipe(AQUA, kWipeDelay); // Aqua
-  colorWipe(BLUE, kWipeDelay); // Blue
-  colorWipe(VIOLET, kWipeDelay); //Indigo
-  colorWipe(WHITE, kWipeDelay); // Purple
+#if 1
+  Serial.println("  colorWipe(RED, kWipeDelay);");
+  colorWipe(RED, kWipeDelay);
+  Serial.println("  colorWipe(ORANGE, kWipeDelay);");
+  colorWipe(ORANGE, kWipeDelay);
+  Serial.println("  colorWipe(YELLOW, kWipeDelay);");
+  colorWipe(YELLOW, kWipeDelay);
+  Serial.println("  colorWipe(GREEN, kWipeDelay);");
+  colorWipe(GREEN, kWipeDelay);
+  Serial.println("  colorWipe(AQUA, kWipeDelay);");
+  colorWipe(AQUA, kWipeDelay);
+  Serial.println("  colorWipe(BLUE, kWipeDelay);");
+  colorWipe(BLUE, kWipeDelay);
+  Serial.println("  colorWipe(VIOLET, kWipeDelay);");
+  colorWipe(VIOLET, kWipeDelay);
+  Serial.println("  colorWipe(BLACK, kWipeDelay);");
+  colorWipe(BLACK, kWipeDelay);
+  Serial.println("  rainbow(kWipeDelay, 6);");
+  rainbow(kWipeDelay, 6);
+  Serial.println("  cylon(0, kFastCylonTime, 6, false);");
   cylon(0, kFastCylonTime, 6, false);
+  Serial.println("  cylon(1, kFastCylonTime, 6, false);");
   cylon(1, kFastCylonTime, 6, false);
+  Serial.println("  cylon(2, kFastCylonTime, 6, false);");
   cylon(2, kFastCylonTime, 6, false);
+  Serial.println("  cylon(3, kSlowCylonTime, 6, false);");
   cylon(3, kSlowCylonTime, 6, false);
+  Serial.println("  cylon(4, kSlowCylonTime, 6, false);");
   cylon(4, kSlowCylonTime, 6, false);
+  Serial.println("  cylon(5, kSlowCylonTime, 6, false);");
+  cylon(5, kSlowCylonTime, 6, false);
+  Serial.println("  cylon(0, kFastCylonTime, 6, true);");
   cylon(0, kFastCylonTime, 6, true);
+  Serial.println("  cylon(1, kFastCylonTime, 6, true);");
   cylon(1, kFastCylonTime, 6, true);
+  Serial.println("  cylon(2, kFastCylonTime, 6, true);");
   cylon(2, kFastCylonTime, 6, true);
+  Serial.println("  cylon(3, kSlowCylonTime, 6, true);");
   cylon(3, kSlowCylonTime, 6, true);
+  Serial.println("  cylon(4, kSlowCylonTime, 6, true);");
   cylon(4, kSlowCylonTime, 6, true);
-  rainbow(kWipeDelay);
-  rainbowCycle(kWipeDelay);
-  cylon(4, kSlowCylonTime, 6, false);
+  Serial.println("  cylon(5, kSlowCylonTime, 6, true);");
+  cylon(5, kSlowCylonTime, 6, true);
+  Serial.println("  colorWipe(BLACK, kWipeDelay);");
+  colorWipe(BLACK, kWipeDelay);
+  Serial.println("  rainbowCycle(kWipeDelay, 6);");
+  rainbowCycle(kWipeDelay, 6);
+#else
+  cylon(5, kSlowCylonTime, 6, false);
+#endif
 }
 
 //#############################################################
@@ -82,6 +111,7 @@ void cylon(uint8_t mode, uint16_t loopspeed, uint16_t numberofpasses, boolean in
   uint16_t pass = 0;
   int16_t leadpos = 0;
 
+  boolean affects_whole_string = mode > 2 && invert;
 
   // static color modes
   switch (mode) {
@@ -120,9 +150,9 @@ void cylon(uint8_t mode, uint16_t loopspeed, uint16_t numberofpasses, boolean in
     //counter for dynamic rainbows
     j = (j + 1) % 256;
 
-    for(int16_t i = max(0, leadpos - WIDTH) ;
-        i < min(strip.numPixels(), leadpos + WIDTH + 1) ;
-        i++) {
+    int16_t start_index = affects_whole_string ? 0 : max(0, leadpos - kCylonWidth);
+    int16_t end_index = affects_whole_string ? strip.numPixels() : min(strip.numPixels(), leadpos + kCylonWidth + 1);
+    for(int16_t i = start_index ; i < end_index ; ++i) {
       uint32_t c = basecolor;
 
       switch (mode) {
@@ -144,12 +174,12 @@ void cylon(uint8_t mode, uint16_t loopspeed, uint16_t numberofpasses, boolean in
 
       int32_t distance = abs(leadpos - i);
       if (invert) {
-        distance = max(0, WIDTH - distance);
+        distance = max(0, kCylonWidth - distance);
       }
-      if (distance >= WIDTH) {
+      if (distance >= kCylonWidth) {
         c = 0;
       } else if (distance) {
-        int32_t percent = 100 * (WIDTH - distance) / WIDTH;
+        int32_t percent = 100 * (kCylonWidth - distance) / kCylonWidth;
         c = fadeColor(c, percent);
       }
 
@@ -211,15 +241,22 @@ void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, c);
       strip.show();
-      delay(wait);
+      if (wait) delay(wait);
   }
 }
 
-void rainbow(uint8_t wait) {
+void setAll(uint32_t c) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
+  strip.show();
+}
+
+void rainbow(uint8_t wait, uint32_t number_of_cycles) {
   uint16_t i, j;
 
-  for(j=0; j<256; j++) {
-    for(i=0; i<strip.numPixels(); i++) {
+  for(j = 0; j < 256 * number_of_cycles; j++) {
+    for(i = 0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel((i+j) & 255));
     }
     strip.show();
@@ -228,11 +265,11 @@ void rainbow(uint8_t wait) {
 }
 
 // Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
+void rainbowCycle(uint8_t wait, uint32_t number_of_cycles) {
   uint16_t i, j;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< strip.numPixels(); i++) {
+  for(j = 0; j < 256 * number_of_cycles; j++) { // 5 cycles of all colors on wheel
+    for(i = 0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
     }
     strip.show();
