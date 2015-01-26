@@ -4,7 +4,12 @@
 static uint32_t kOutputPIN = 2;
 static uint32_t kNumberOfPixels = 150;
 
-#define WIDTH 40
+static uint32_t kWipeDelay = 2;
+
+static uint32_t kSlowCylonTime = 2000;
+static uint32_t kFastCylonTime = 1000;
+
+#define WIDTH 80
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -39,28 +44,27 @@ void setup() {
 
 void loop() {
   // Some example procedures showing how to display to the pixels:
-//  colorWipe(strip.Color(255, 0, 0), 20); // Red
-//  colorWipe(RED, 20); // Red
-//  colorWipe(ORANGE, 20); // Orange
-//  colorWipe(YELLOW, 20); // Yellow
-//  colorWipe(GREEN, 20); // Green
-//  colorWipe(AQUA, 20); // Aqua
-//  colorWipe(BLUE, 20); // Blue
-//  colorWipe(VIOLET, 20); //Indigo
-//  colorWipe(WHITE, 20); // Purple
-//  cylon(0, 1000, 6);
-//  cylon(1, 1000, 6);
-//  cylon(2, 1000, 6);
-//  cylon(3, 2000, 6);
-//  cylon(4, 2000, 6);
-//  invertcylon(0, 1000, 6);
-//  invertcylon(1, 1000, 6);
-//  invertcylon(2, 1000, 6);
-//  invertcylon(3, 2000, 6);
-//  invertcylon(4, 2000, 6);
-//  rainbow(20);
-//  rainbowCycle(20);
-  cylon(0, 0, 0, false);
+  colorWipe(RED, kWipeDelay); // Red
+  colorWipe(ORANGE, kWipeDelay); // Orange
+  colorWipe(YELLOW, kWipeDelay); // Yellow
+  colorWipe(GREEN, kWipeDelay); // Green
+  colorWipe(AQUA, kWipeDelay); // Aqua
+  colorWipe(BLUE, kWipeDelay); // Blue
+  colorWipe(VIOLET, kWipeDelay); //Indigo
+  colorWipe(WHITE, kWipeDelay); // Purple
+  cylon(0, kFastCylonTime, 6, false);
+  cylon(1, kFastCylonTime, 6, false);
+  cylon(2, kFastCylonTime, 6, false);
+  cylon(3, kSlowCylonTime, 6, false);
+  cylon(4, kSlowCylonTime, 6, false);
+  cylon(0, kFastCylonTime, 6, true);
+  cylon(1, kFastCylonTime, 6, true);
+  cylon(2, kFastCylonTime, 6, true);
+  cylon(3, kSlowCylonTime, 6, true);
+  cylon(4, kSlowCylonTime, 6, true);
+  rainbow(kWipeDelay);
+  rainbowCycle(kWipeDelay);
+  cylon(4, kSlowCylonTime, 6, false);
 }
 
 //#############################################################
